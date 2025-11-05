@@ -5,6 +5,7 @@ import SignUp from "./pages/SignUp";
 import Post from "./pages/Post";
 import Profile from "./pages/Profile";
 import Edit from "./pages/Edit";
+import Study from "./pages/Study";
 
 function App() {
   // logic
@@ -21,10 +22,12 @@ function App() {
             <Route path="/post" element={<Post />} />
             <Route path="/edit/:id" element={<Edit />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/study" element={<Study />} />
           </Routes>
         </BrowserRouter>
       </div>
     </div>
+
   );
 }
 
