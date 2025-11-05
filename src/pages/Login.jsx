@@ -2,6 +2,8 @@ import React from "react";
 import InputField from "../components/InputField";
 import LoginButton from "../components/LoginButton";
 import { Link } from "react-router-dom";
+import { GoogleAuthProvider, ProviderId, signInWithPopup } from "firebase/auth";
+import { auth } from "../firebase";
 
 const Login = () => {
   // logic
@@ -14,8 +16,18 @@ const Login = () => {
     // TODO: 로그인 기능 구현
   };
 
-  const handleGoogleLogin = () => {
+  const handleGoogleLogin = async () => {
     // TODO: 구글 로그인 구현
+    const provider = new GoogleAuthProvider();
+    try {
+      // 1. 팝업띄워서 로그인
+      await signInWithPopup(auth, provider);
+      console.log("구글 로그인 완료", auth);
+
+      // 2. Home 화면으로 이동
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   // view
