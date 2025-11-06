@@ -41,11 +41,7 @@ const Login = () => {
     setIsLoading(true);
     try {
       // 비동기처리 성공시
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
+      await signInWithEmailAndPassword(auth, email, password);
 
       // 홈화면으로 리다이렉트
       history("/");

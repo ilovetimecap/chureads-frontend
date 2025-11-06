@@ -9,6 +9,9 @@ const Home = () => {
   // logic
   const history = useNavigate();
 
+  // API 기본 URL설정
+  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+
   const [feedList, setFeedList] = useState(initialFeedList);
 
   const handleEdit = (data) => {
@@ -23,12 +26,20 @@ const Home = () => {
   };
 
   const handleLike = (selectedId) => {
-    console.log("🚀 ~ handleLike ~ selectedId:", selectedId)
-  }
+    console.log("🚀 ~ handleLike ~ selectedId:", selectedId);
+  };
 
   useEffect(() => {
     // 페이지 진입시 딱 한번 실행
+
     // TODO: 백엔드에 Get 요청
+    const fetchPosts = async () => {
+      try {
+        await fetch(`${API_BASE_URL}/posts`);
+      } catch (error) {
+        console.error(`게시물조회 실패: ${error}`);
+      }
+    };
   }, []);
 
   // view
