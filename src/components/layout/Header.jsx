@@ -1,7 +1,20 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { auth } from "../../firebase";
 
 const Header = ({ isLoggedIn }) => {
+  // logic
+  const history = useNavigate();
+
+  const handleLogout = async () => {
+    const ok = window.confirm("Are you sure logout?");
+    if (ok) {
+      await auth.signOut();
+      history("/login");
+    }
+  };
+
+  // view
   return (
     <header className="max-w-[572px] fixed top-0 left-0 right-0 mx-auto">
       <h1 className="py-2 text-center">
@@ -10,7 +23,7 @@ const Header = ({ isLoggedIn }) => {
         </Link>
       </h1>
       <div className="absolute top-1/2 tranform -translate-y-1/2 right-5 rounded-lg bg-white text-churead-black flex items-center px-2 text-sm">
-        <button type="button" className="p-1">
+        <button type="button" className="p-1" onClick={handleLogout}>
           {isLoggedIn ? "로그아웃" : "로그인"}
         </button>
       </div>

@@ -1,19 +1,61 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import InputField from "../components/InputField";
 import LoginButton from "../components/LoginButton";
-import { Link } from "react-router-dom";
-import { GoogleAuthProvider, ProviderId, signInWithPopup } from "firebase/auth";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  GoogleAuthProvider,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+} from "firebase/auth";
 import { auth } from "../firebase";
 
 const Login = () => {
   // logic
+  const history = useNavigate();
+
+  const currentUser = auth.currentUser;
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  // 로딩 상태
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleInputChange = (inputValue, field) => {
-    // TODO: 사용자 입력 기능 구현
+    if (field === "email") {
+      setEmail(inputValue);
+    } else {
+      setPassword(inputValue);
+    }
   };
 
-  const handleLogin = (event) => {
-    // TODO: 로그인 기능 구현
+  const handleLogin = async (event) => {
+    event.preventDefault(); // 폼 제출시 새로고침 방지 메소드
+    // 로그인 기능
+
+    setErrorMessage("");
+
+    // 로딩중이거나 사용자가 emaill, password값 작성 안하면 실행안함
+    if (isLoading || !email || !password) return;
+
+    setIsLoading(true);
+    try {
+      // 비동기처리 성공시
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+
+      // 홈화면으로 리다이렉트
+      history("/");
+    } catch (error) {
+      // 비동기처리 실패시
+      setErrorMessage(error.message);
+    } finally {
+      // 성공, 실패 상관없이 마지막에 실행
+      setIsLoading(false);
+    }
   };
 
   const handleGoogleLogin = async () => {
@@ -22,13 +64,18 @@ const Login = () => {
     try {
       // 1. 팝업띄워서 로그인
       await signInWithPopup(auth, provider);
-      console.log("구글 로그인 완료", auth);
-
-      // 2. Home 화면으로 이동
+      // console.log("구글 로그인 완료", auth)
+      // 2. Home화면으로 이동
+      history("/");
     } catch (error) {
       console.error(error);
     }
   };
+
+  useEffect(() => {
+    // 이미 로그인 된 경우에 home화면으로 이동
+    currentUser && history("/");
+  });
 
   // view
   return (
@@ -52,7 +99,11 @@ const Login = () => {
             field="password"
             onChange={handleInputChange}
           />
-          <LoginButton category="login" text="Login" />
+          {errorMessage && <p className="text-red-600">{errorMessage}</p>}
+          <LoginButton
+            category="login"
+            text={isLoading ? "Login" : "Loading"}
+          />
         </form>
         {/* END: 폼 영역 */}
         <div className="flex justify-center gap-1 py-6">
