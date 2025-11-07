@@ -1,17 +1,52 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import PostInput from "../components/PostInput";
+import { auth } from "../firebase";
 
 const Post = () => {
   // logic
   const history = useNavigate();
+
+  // API 기본 URL 설정
+  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+
+  const currentUser = auth.currentUser;
+
   const [churead, setChuread] = useState("");
+
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (value) => {
     setChuread(value);
   };
 
-  const handlePost = (event) => {
+  // POST /posts - 새 게시물 작성
+  const createPost = async (postData) => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/posts`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(postData), // JSON형식으로 변환
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json(); // 자바스크립트 객체로 변환
+      return result;
+    } catch (error) {
+      console.error("게시물 작성 실패:", error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handlePost = async (event) => {
     event.preventDefault(); // 폼 제출시 새로고침 방지 메소드
 
     // 1. 텍스트에서 불필요한 공백 제거하기
@@ -29,7 +64,17 @@ const Post = () => {
     // 빈 스트링이 아닌 경우
     // TODO: 백엔드에 Post 요청
 
-    history("/"); // home화면으로 이동
+    const newItem = {
+      userName: currentUser.displayName,
+      userId: currentUser.uid,
+      userProfileImage:
+        currentUser.photoURL ||
+        "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",
+      content: resultChuread,
+    };
+
+    const result = await createPost(newItem);
+    result && history("/"); // home화면으로 이동
   };
 
   // view
@@ -48,7 +93,11 @@ const Post = () => {
         <div className="h-full overflow-auto">
           <form id="post" onSubmit={handlePost}>
             {/* START: 사용자 입력 영역 */}
-            <PostInput onChange={handleChange} />
+            <PostInput
+              userName={currentUser.displayName}
+              userProfileImage={currentUser.photoURL}
+              onChange={handleChange}
+            />
             {/* END: 사용자 입력 영역 */}
             {/* START: 게시 버튼 영역 */}
             <div className="w-full max-w-[572px] flex items-center fixed bottom-0 lef p-6">
@@ -59,7 +108,7 @@ const Post = () => {
                 type="submit"
                 className="ml-auto px-5 py-2 bg-white text-churead-black rounded-3xl font-bold"
               >
-                게시
+                {isLoading ? "Loading..." : "게시"}
               </button>
             </div>
             {/* END: 게시 버튼 영역 */}
